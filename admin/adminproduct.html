@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Products List</title>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <h2>Inventory</h2>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <a href="admin.html">Dashboard</a>
+    <a href="adminorder.html">Add Product</a>
+    <a href="adminproduct.html" class="active">Product List</a>
+    <a href="orders.html">Orders</a>
+    <a href="#" onclick="logoutAdmin()">Logout</a>
+  </nav>
+
+  <main class="content">
+    <div class="compact-list" id="productListContainer">
+      </div>
+  </main>
+
+  <script src="fetch.js"></script>
+  <script src="productList.js"></script>
+</body>
+</html>

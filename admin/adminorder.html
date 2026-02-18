@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><title>Add Product</title>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <h2>Add New Product</h2>
+    <button class="menu-btn" id="menuBtn">☰</button>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <a href="admin.html">Dashboard</a>
+    <a href="adminorder.html" class="active">Add Product</a>
+    <a href="adminproduct.html">Product List</a>
+    <a href="orders.html">Orders</a>
+    <a href="#" onclick="logoutAdmin()">Logout</a>
+  </nav>
+
+  <main class="content">
+    <form class="product-form" id="addProductForm">
+      <div class="input-group">
+        <label>Product Name</label>
+        <input type="text" id="pName" placeholder="e.g. Silk Summer Dress" required />
+      </div>
+      
+      <div class="input-group">
+        <label>Price (₦)</label>
+        <input type="number" id="pPrice" placeholder="5000" required />
+      </div>
+
+      <div class="input-group">
+        <label>Category</label>
+        <input type="text" id="pCategory" placeholder="e.g. Vintage, Luxury" required />
+      </div>
+
+      <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px;">
+        <input type="checkbox" id="pNewArrival" style="width: auto;" />
+        <label for="pNewArrival" style="margin: 0;">Mark as New Arrival</label>
+      </div>
+
+      <div class="input-group">
+        <label>Product Image</label>
+        <input type="file" id="imageInput" accept="image/*" required />
+        <img id="imagePreview" style="width: 120px; margin-top: 10px; display: none; border-radius: 8px;" />
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">Add Product</button>
+    </form>
+  </main>
+
+  <script src="fetch.js"></script>
+  <script src="addProduct.js"></script>
+  <script>
+    // Sidebar Toggle Logic
+    document.getElementById('menuBtn').onclick = () => {
+        document.getElementById('sidebar').classList.toggle('active');
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vicky's Collection | Luxury Thriftwears</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .user-menu-wrapper { position: relative; display: inline-block; }
+        .user-dropdown {
+            position: absolute; top: 100%; right: 0; background: white;
+            width: 250px; padding: 20px; border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.3s ease; z-index: 1000; border: 1px solid #f0f0f0;
+            text-align: left; color: #333;
+        }
+        .user-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .user-dropdown::before {
+            content: ''; position: absolute; top: -10px; right: 20px;
+            border-left: 10px solid transparent; border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+        .user-header { text-align: center; margin-bottom: 15px; }
+        .user-header h4 { margin: 5px 0; font-size: 1.1rem; }
+        .user-options { list-style: none; padding: 0; margin: 0; }
+        .user-options li { margin: 10px 0; }
+        .user-options a, .user-options button {
+            display: flex; align-items: center; text-decoration: none; color: #333;
+            padding: 10px; border-radius: 6px; transition: background 0.2s;
+        }
+        .user-options a:hover, .user-options button:hover { background: #f5f5f5; }
+        .user-options i { margin-right: 10px; width: 20px; text-align: center; }
+        .logout-btn { width: 100%; text-align: left; }
+        
+        .shop-grid, .wardrobe-grid { min-height: 250px; display: grid; width: 100%; }
+        .empty-state-msg {
+            grid-column: 1 / -1; text-align: center; padding: 40px;
+            color: #888; font-style: italic; border: 1px dashed #ddd;
+            border-radius: 8px; margin: 20px 0;
+        }
+
+        .view-more-container { text-align: center; margin: 40px 0; width: 100%; }
+        .btn-view-more {
+            padding: 12px 35px; background-color: #1a1a1a; color: white;
+            border: none; cursor: pointer; font-size: 0.9rem;
+            letter-spacing: 1px; text-transform: uppercase; transition: 0.3s;
+        }
+        .btn-view-more:hover { background-color: #444; }
+        .hidden { display: none; }
+/* --- Ensure this logic is in your style.css --- */
+/* Desktop Navigation (Default) */
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 20px;
+    }
+
+    .menu-btn {
+        display: none; /* Hide bars icon on desktop */
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+
+    /* Mobile Sidebar Navigation */
+    @media (max-width: 768px) {
+        .menu-btn {
+            display: block; /* Show bars icon on mobile */
+        }
+
+        .nav-links {
+            position: fixed;
+            top: 0;
+            left: -100%; /* Completely hidden off-screen to the left */
+            height: 100vh;
+            width: 280px;
+            background: white;
+            flex-direction: column;
+            padding: 80px 30px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth slide effect */
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex; /* Override display: none if any */
+        }
+
+        /* The "Active" state that makes it slide in */
+        .nav-links.active {
+            left: 0; 
+        }
+
+        .nav-links li {
+            margin: 15px 0;
+        }
+
+        .nav-links a {
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+    }
+        /* Improved Footer Styles */
+        .main-footer {
+            background: #1a1a1a; color: #fff; padding: 60px 0 20px;
+            font-size: 0.9rem; text-align: center;
+        }
+        .footer-content {
+            display: flex; flex-wrap: wrap; justify-content: space-around;
+            max-width: 1200px; margin: 0 auto 40px; padding: 0 20px;
+        }
+        .footer-section {
+            flex: 1; min-width: 200px; margin: 20px;
+            text-align: left;
+        }
+        .footer-section h3 {
+            font-size: 1.2rem; margin-bottom: 20px; text-transform: uppercase;
+            letter-spacing: 1px; position: relative;
+        }
+        .footer-section h3::after {
+            content: ''; display: block; width: 40px; height: 2px;
+            background: #fff; margin-top: 10px;
+        }
+        .footer-section p { margin: 10px 0; opacity: 0.8; }
+        .footer-section ul { list-style: none; padding: 0; }
+        .footer-section li { margin: 10px 0; }
+        .footer-section a { color: #fff; text-decoration: none; transition: opacity 0.2s; }
+        .footer-section a:hover { opacity: 0.7; }
+        .social-icons { margin-top: 20px; }
+        .social-icons a {
+            color: #fff; font-size: 1.2rem; margin: 0 10px;
+            transition: transform 0.2s;
+        }
+        .social-icons a:hover { transform: scale(1.1); }
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1); padding: 20px 0;
+            opacity: 0.6; font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sections.html">Collections</a></li>
+            <li><a href="http://wa.me/2348125269279">Contact</a></li>
+        </ul>
+        <div class="logo">VICKY'S</div>
+        <div class="nav-icons">
+            <a href="#"><i class="fas fa-search"></i></a>
+            <div class="user-menu-wrapper">
+                <a href="signupform.html" id="userIconBtn"><i class="far fa-user"></i></a>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-header">
+                        <p style="font-size: 0.7rem; color: gray; margin:0;">ACCOUNT</p>
+                        <h4 id="userNameDisplay">Guest User</h4>
+                    </div>
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <ul class="user-options">
+                        <li><a href="addtocart.html"><i class="fas fa-shopping-bag"></i> My Orders</a></li>
+                        <li><a href="profile.html"><i class="fas fa-user-edit"></i> Profile</a></li>
+                        <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                        <li><button onclick="logoutUser()" class="logout-btn" style="color:#c0392b; background:none; border:none; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+                    </ul>
+                </div>
+            </div>
+            <a href="addtocart.html"><i class="fas fa-shopping-bag"></i></a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <p class="subtitle">NEW SEASON ARRIVALS</p>
+            <h1>Elevate Your<br>Everyday Style</h1>
+            <a href="#shop-start" class="btn-primary">Shop The Collection</a>
+        </div>
+    </section>
+
+    <section class="shop-container" id="shop-start">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <div class="dropdown">
+                    <button class="dropbtn">Categories <i class="fas fa-chevron-down"></i></button>
+                    <div class="dropdown-content" id="category-dropdown"></div>
+                </div>
+            </div>
+            <div class="sort-group">
+                <span class="sort-label">Default Sorting <i class="fas fa-chevron-down"></i></span>
+            </div>
+        </div>
+
+        <div class="shop-grid" id="product-grid">
+            <p style="text-align: center; grid-column: 1/-1;">Loading luxury pieces...</p>
+        </div>
+
+        <div class="view-more-container">
+            <button id="view-more-btn" class="btn-view-more hidden" onclick="location.href='sections.html'">View All Collections</button>
+        </div>
+    </section>
+
+    <section class="lifestyle-gallery">
+        <div class="gallery-header">
+            <h2>New Arrival</h2>
+            <div class="header-line"></div>
+        </div>
+        <div class="wardrobe-grid" id="new-arrivals-grid"></div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section about">
+                <h3>VICKY'S Collection</h3>
+                <p>Luxury thriftwears that elevate your everyday style. Discover unique pieces curated for the modern wardrobe.</p>
+            </div>
+            <div class="footer-section links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="sections.html">Collections</a></li>
+                    <li><a href="addtocart.html">My Cart</a></li>
+                    <li><a href="http://wa.me/2348125269279">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section contact">
+                <h3>Get in Touch</h3>
+                <p><i class="fas fa-phone-alt"></i> +234 812 526 9279</p>
+                <p><i class="fas fa-envelope"></i> info@vickyscollection.com</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Vicky's Collection. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="fetch.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

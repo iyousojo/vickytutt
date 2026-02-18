@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vicky's Collection | Infinite Luxury</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .loader-footer {
+            text-align: center;
+            padding: 40px;
+            width: 100%;
+            display: none; /* Hidden until scrolling */
+        }
+        .no-more-data {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="logo">VICKY'S</div>
+        <div class="nav-icons">
+            <a href="index.html">Home</a>
+            <a href="addtocart.html"><i class="fas fa-shopping-bag"></i></a>
+        </div>
+    </nav>
+
+    <header class="section-header" style="text-align: center; padding: 80px 20px;">
+        <h1 style="letter-spacing: 5px;">THE VAULT</h1>
+        <p style="color: #666;">Scroll to explore the full collection</p>
+    </header>
+
+    <section class="shop-container">
+        <div class="shop-grid" id="infinite-grid"></div>
+
+        <div class="loader-footer" id="bottom-loader">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #1a1a1a;"></i>
+        </div>
+
+        <div class="no-more-data" id="end-message">
+            <hr style="width: 50px; margin: 20px auto; border-top: 1px solid #ddd;">
+            <p>You have viewed the entire collection</p>
+        </div>
+    </section>
+
+    <script src="fetch.js"></script>
+   <script src="fetch.js"></script>
+<script>
+    let allProducts = [];
+    let currentIndex = 0;
+    const itemsPerBatch = 8;
+    let isLoading = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const grid = document.getElementById('infinite-grid');
+        
+        // 1. Initial Fetch
+        const response = await fetchAllProducts();
+        
+        // Handle nested data structures (response.data.data)
+        let products = response?.data;
+        if (products && products.data) products = products.data;
+
+        if (!products || products.length === 0) {
+            grid.innerHTML = "<div style='text-align:center; width:100%; padding:100px;'><h3>NO DATA FOUND</h3><p>Our collection is currently being refreshed.</p></div>";
+            return;
+        }
+
+        allProducts = products;
+        loadMoreItems(); 
+    });
+
+    function loadMoreItems() {
+        if (isLoading || currentIndex >= allProducts.length) return;
+
+        isLoading = true;
+        document.getElementById('bottom-loader').style.display = 'block';
+
+        setTimeout(() => {
+            const grid = document.getElementById('infinite-grid');
+            const nextBatch = allProducts.slice(currentIndex, currentIndex + itemsPerBatch);
+
+            nextBatch.forEach(product => {
+                // Create element to avoid innerHTML += performance issues and event stripping
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-img-wrapper">
+                        <img src="${fixImg(product.imageUrl || product.image)}" alt="${product.name}">
+                        <div class="cart-overlay">
+                            <button class="add-btn" onclick="addToBag('${product._id}')">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="shop-info">
+                        <p class="brand-tag">VICKY'S THRIFT</p>
+                        <h4 class="product-name">${product.name}</h4>
+                        <p class="product-price">₦${Number(product.price).toLocaleString()}</p>
+                    </div>`;
+                grid.appendChild(card);
+            });
+
+            currentIndex += itemsPerBatch;
+            isLoading = false;
+            document.getElementById('bottom-loader').style.display = 'none';
+
+            if (currentIndex >= allProducts.length) {
+                document.getElementById('end-message').style.display = 'block';
+            }
+        }, 600);
+    }
+
+    // --- ADD TO CART LOGIC ---
+    function addToBag(productId) {
+        const token = localStorage.getItem('vicky_token');
+        if (!token) {
+            alert("Please login first to build your collection.");
+            window.location.href = 'signupform.html';
+            return;
+        }
+
+        const product = allProducts.find(p => p._id === productId);
+        if (!product) return;
+
+        let cart = JSON.parse(localStorage.getItem('vicky_cart') || '[]');
+        const existing = cart.find(item => item.id === productId);
+
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                image: fixImg(product.imageUrl || product.image),
+                quantity: 1
+            });
+        }
+
+        localStorage.setItem('vicky_cart', JSON.stringify(cart));
+        alert(`${product.name} added to your luxury bag!`);
+    }
+
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+            loadMoreItems();
+        }
+    });
+</script>
+</body>
+</html>

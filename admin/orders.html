@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><title>Manage Orders | Vicky's Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+  <style>
+    /* Status Badge Styles */
+    .status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+    .status.pending { background: #fff3cd; color: #856404; }
+    .status.paid { background: #d4edda; color: #155724; }
+    .status.shipped { background: #cce5ff; color: #004085; }
+    
+    .view-btn {
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    .view-btn:hover { background: #444; }
+  </style>
+</head>
+<body>
+  <header class="topbar"><h2>Customer Orders</h2></header>
+  <nav class="sidebar" id="sidebar">
+    <a href="admin.html">Dashboard</a>
+    <a href="adminorder.html">Add Product</a>
+    <a href="adminproduct.html">Product List</a>
+    <a href="orders.html" class="active">Orders</a>
+    <a href="#" onclick="logoutAdmin()">Logout</a>
+  </nav>
+
+  <main class="content">
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f8f9fa; border-bottom: 2px solid #eee;">
+            <tr>
+              <th style="padding: 15px; text-align: left;">Order ID</th>
+              <th style="text-align: left;">Customer</th>
+              <th style="text-align: left;">Items</th>
+              <th style="text-align: left;">Amount</th>
+              <th style="text-align: left;">Status</th>
+              <th style="text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="orderList">
+              </tbody>
+        </table>
+    </div>
+  </main>
+
+  <script src="fetch.js"></script>
+ 
+<script>
+    async function loadOrdersTable() {
+        const tableBody = document.getElementById('orderList');
+        // Show loading state
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Fetching orders...</td></tr>';
+        
+        try {
+            const result = await fetchAllOrders();
+            
+            if (result.success && result.data.length > 0) {
+                tableBody.innerHTML = result.data.map(order => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px;">#${order._id.slice(-5).toUpperCase()}</td>
+                        <td>
+                            <strong>${order.userId?.firstName || 'Guest'}</strong><br>
+                            <small style="color:gray;">${order.userId?.email || 'N/A'}</small>
+                        </td>
+                        <td>₦${Number(order.totalAmount || 0).toLocaleString()}</td>
+                        <td>
+                            <span class="status-pill ${order.status}">
+                                ${order.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                const message = result.message || "No orders found in the database.";
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">${message}</td></tr>`;
+            }
+        } catch (error) {
+            console.error("Table Load Error:", error);
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">Failed to connect to server.</td></tr>';
+        }
+    }
+
+    // Run when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('vicky_admin_token');
+        if (!token) {
+            window.location.replace('adminlogin.html');
+        } else {
+            loadOrdersTable();
+        }
+    });
+</script>
+</body>
+</html>

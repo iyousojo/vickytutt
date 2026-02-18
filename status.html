@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status | Vicky's Thrift</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .status-container {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 80vh; text-align: center; padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .status-card {
+            background: white; padding: 40px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 400px; width: 100%;
+        }
+        .status-icon { font-size: 4rem; margin-bottom: 20px; }
+        .success-icon { color: #27ae60; }
+        .error-icon { color: #eb4d4b; }
+        .btn-home {
+            margin-top: 25px; display: inline-block; padding: 12px 30px;
+            background: #000; color: #fff; text-decoration: none; border-radius: 25px;
+            transition: transform 0.2s;
+        }
+        .btn-home:hover { transform: scale(1.05); }
+        .hidden { display: none; } /* Added this missing class */
+    </style>
+</head>
+<body>
+
+<div class="status-container">
+    <div class="status-card" id="statusCard">
+        <div id="loader">
+            <i class="fas fa-spinner fa-spin status-icon" style="color: #666;"></i>
+            <h2>Verifying Payment...</h2>
+        </div>
+        
+        <div id="statusContent" class="hidden">
+            </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const isSuccess = params.get('success') === 'true';
+        const orderId = params.get('ord') || ""; // Fallback to empty string
+        const errorMsg = params.get('msg');
+
+        const content = document.getElementById('statusContent');
+        const loader = document.getElementById('loader');
+
+        // Hide loader and show content
+        loader.classList.add('hidden');
+        content.classList.remove('hidden');
+
+        if (isSuccess) {
+            // 1. Clear the cart
+            localStorage.removeItem('vicky_cart');
+            
+            // 2. Format order ID (Safely handle if ID is too short)
+            const displayId = orderId.length > 6 ? orderId.slice(-6).toUpperCase() : "SUCCESS";
+
+            content.innerHTML = `
+                <i class="fa-solid fa-circle-check status-icon success-icon"></i>
+                <h2 style="margin-bottom:10px;">Payment Successful!</h2>
+                <p>Thank you for shopping with Vicky's Thrift. Your order <strong>#${displayId}</strong> is being processed.</p>
+                <a href="index.html" class="btn-home">Continue Shopping</a>
+            `;
+        } else {
+            content.innerHTML = `
+                <i class="fa-solid fa-circle-xmark status-icon error-icon"></i>
+                <h2 style="margin-bottom:10px;">Payment Failed</h2>
+                <p>We couldn't process your payment. ${errorMsg || "Please try again."}</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="addtocart.html" class="btn-home">Go Back to Bag</a>
+                    <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Return to Home</a>
+                </div>
+            `;
+        }
+    });
+</script>
+</body>
+</html>
