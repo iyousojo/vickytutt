@@ -1,12 +1,33 @@
 // fetch.js
 const API_URL = 'https://ecommerceapi-f6ep.onrender.com/api';
 
-// fetch.js
+async function loginUser(email, password) {
+    try {
+        // CHANGED: Using the consistent API_URL instead of the old vickys-thrift URL
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return { success: false, error: data.message || "Login failed" };
+        }
+
+        return { success: true, user: data.user, token: data.token };
+    } catch (error) {
+        // This triggers if the server is down or blocked by CORS
+        console.error("Fetch error:", error);
+        return { success: false, error: "Cannot connect to server. Check your internet or backend status." };
+    }
+}
+
 async function fetchAllProducts() {
     try {
         const response = await fetch(`${API_URL}/products`);
         const data = await response.json();
-        // Log this to your console so you can see the real structure!
         console.log("Products API Response:", data); 
         return data; 
     } catch (error) {
@@ -30,30 +51,5 @@ async function fetchAllOrders() {
         return { success: false, message: data.message || "Access Denied" };
     } catch (error) {
         return { success: false, message: "Server connection failed" };
-    }
-}
-
-function logoutAdmin() {
-    localStorage.clear();
-    window.location.replace('adminlogin.html');
-}
-async function loginUser(email, password) {
-    try {
-        const response = await fetch('https://vickys-thrift.onrender.com/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            return { success: false, error: data.message || "Login failed" };
-        }
-
-        return { success: true, user: data.user, token: data.token };
-    } catch (error) {
-        console.error("Fetch error:", error);
-        return { success: false, error: "Cannot connect to server" };
     }
 }
