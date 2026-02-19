@@ -11,10 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (menuBtn && navLinks) {
         menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevents the 'document click' below from closing it instantly
+            e.stopPropagation(); 
             navLinks.classList.toggle('active');
             
-            // Toggle icon between bars and X
             const icon = menuBtn.querySelector('i');
             if (navLinks.classList.contains('active')) {
                 icon.classList.replace('fa-bars', 'fa-times');
@@ -23,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Close menu when a link inside is clicked (useful for one-page navigation)
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('active');
@@ -34,21 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Close everything (sidebar & user dropdown) when clicking outside
     document.addEventListener('click', (e) => {
-        // Close Sidebar
         if (navLinks && navLinks.classList.contains('active') && !navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
             navLinks.classList.remove('active');
             menuBtn.querySelector('i').classList.replace('fa-times', 'fa-bars');
         }
         
-        // Close User Dropdown
         const dropdown = document.getElementById('userDropdown');
         if (dropdown && dropdown.classList.contains('active')) {
             dropdown.classList.remove('active');
         }
     });
 });
-
-// ... (Rest of your loadPageData, handleUserAuth, and addToBag functions remain the same)
 
 async function loadPageData() {
     const shopGrid = document.getElementById('product-grid');
@@ -71,18 +65,16 @@ async function loadPageData() {
 
         allProducts = products;
 
-        // 1. Render Categories
         if (categoryMenu) {
             const cats = [...new Set(products.map(i => i.category))].filter(Boolean);
             categoryMenu.innerHTML = `<a href="sections.html">All Items</a>` +
                 cats.map(c => `<a href="sections.html?cat=${encodeURIComponent(c)}">${c}</a>`).join('');
         }
 
-        // 2. Render New Arrivals
         if (arrivalsGrid) {
-            const newArrivals = allProducts.filter(item => item.isNewArrival === true || item.isNewArrival === "true");
+            const newArrivals = allProducts.filter(item => item.isNewArrival === true || String(item.isNewArrival) === "true");
             if (newArrivals.length === 0) {
-                arrivalsGrid.innerHTML = `<p class="empty-state-msg" style="grid-column: 1/-1;">Check back soon for new pieces!</p>`;
+                arrivalsGrid.innerHTML = `<p class="empty-state-msg" style="grid-column: 1/-1;">Check back soon!</p>`;
             } else {
                 arrivalsGrid.innerHTML = newArrivals.slice(0, 3).map(item => `
                     <div class="wardrobe-item">
@@ -95,9 +87,8 @@ async function loadPageData() {
             }
         }
 
-        // 3. Render Shop Grid
         if (shopGrid) {
-            const standardProducts = allProducts.filter(item => !item.isNewArrival || item.isNewArrival === "false" || item.isNewArrival === false);
+            const standardProducts = allProducts.filter(item => !item.isNewArrival || String(item.isNewArrival) === "false");
             const displayItems = standardProducts.length > 0 ? standardProducts.slice(0, 8) : allProducts.slice(0, 8);
 
             shopGrid.innerHTML = displayItems.map(item => `
@@ -135,18 +126,16 @@ function handleUserAuth() {
 
     if (userData) {
         const user = JSON.parse(userData);
-        nameDisplay.innerText = user.firstName || "Customer";
-        userBtn.removeAttribute('href');
-        userBtn.style.cursor = 'pointer';
-
-        userBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', () => dropdown.classList.remove('active'));
+        if (nameDisplay) nameDisplay.innerText = user.firstName || "Customer";
+        if (userBtn) {
+            userBtn.removeAttribute('href');
+            userBtn.style.cursor = 'pointer';
+            userBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (dropdown) dropdown.classList.toggle('active');
+            });
+        }
     }
 }
 
@@ -207,10 +196,14 @@ async function initiateCheckout() {
         });
 
         const data = await response.json();
-        if (data.paymentUrl) {
+        
+        // FIXED: Using checkoutUrl to match your Backend OrderService
+        if (data.checkoutUrl) {
+            window.location.href = data.checkoutUrl;
+        } else if (data.paymentUrl) {
             window.location.href = data.paymentUrl;
         } else {
-            throw new Error(data.error || "Unknown error");
+            throw new Error(data.error || "Checkout failed to initialize");
         }
     } catch (err) {
         console.error("Checkout Failed:", err);

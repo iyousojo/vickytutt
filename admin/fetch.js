@@ -37,3 +37,23 @@ function logoutAdmin() {
     localStorage.clear();
     window.location.replace('adminlogin.html');
 }
+async function loginUser(email, password) {
+    try {
+        const response = await fetch('https://vickys-thrift.onrender.com/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return { success: false, error: data.message || "Login failed" };
+        }
+
+        return { success: true, user: data.user, token: data.token };
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return { success: false, error: "Cannot connect to server" };
+    }
+}
