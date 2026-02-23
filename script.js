@@ -17,7 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+function handleUserAuth() {
+    const token = localStorage.getItem('vicky_token');
+    const userName = localStorage.getItem('vicky_user_name');
+    const userNameDisplay = document.getElementById('userNameDisplay');
 
+    if (token && userNameDisplay) {
+        userNameDisplay.innerText = savedName || "Welcome Back!";
+    } else {
+        if(userNameDisplay) userNameDisplay.innerText = "Guest User";
+    }
+}
 async function loadPageData() {
     const shopGrid = document.getElementById('product-grid');
     const arrivalsGrid = document.getElementById('new-arrivals-grid');
