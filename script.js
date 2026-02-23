@@ -146,12 +146,31 @@ function addToBag(productId) {
         window.location.href = 'signupform.html';
         return;
     }
+
     const product = allProducts.find(p => p._id === productId);
     if (!product) return;
 
-    let cart = JSON.parse(localStorage.getItem('vicky_cart') || '[]');
-    const existing = cart.find(item => item.id === productId);
+    // 1. Identify the variant (size) and its available stock
+    const variant = product.variants && product.variants.length > 0 
+        ? product.variants[0] 
+        : null;
 
+    const defaultSize = variant ? variant.size : "N/A";
+    const availableStock = variant ? variant.stock : 0;
+
+    // 2. Load the current cart
+    let cart = JSON.parse(localStorage.getItem('vicky_cart') || '[]');
+    const existing = cart.find(item => item.id === productId && item.size === defaultSize);
+
+    // 3. CHECK STOCK LIMITS
+    const currentQtyInCart = existing ? existing.quantity : 0;
+
+    if (currentQtyInCart >= availableStock) {
+        alert(`Sorry, only ${availableStock} items are available in size ${defaultSize}.`);
+        return; // Stop here, do not add more
+    }
+
+    // 4. Update or Push to Cart
     if (existing) {
         existing.quantity += 1;
     } else {
@@ -160,11 +179,13 @@ function addToBag(productId) {
             name: product.name,
             price: product.price,
             image: fixImg(product.imageUrl || product.image),
+            size: defaultSize,
             quantity: 1
         });
     }
+
     localStorage.setItem('vicky_cart', JSON.stringify(cart));
-    alert(`${product.name} added to bag!`);
+    alert(`${product.name} (Size: ${defaultSize}) added to bag!`);
 }
 
 function logoutUser() {
@@ -180,9 +201,13 @@ async function initiateCheckout() {
         return;
     }
 
+    // Map cart items to include Name and Size for the Order Record
     const items = cart.map(item => ({
         productId: item.id,
-        qty: item.quantity
+        name: item.name,      // IMPORTANT
+        size: item.size,      // IMPORTANT
+        qty: item.quantity,
+        price: item.price
     }));
 
     try {
@@ -196,17 +221,12 @@ async function initiateCheckout() {
         });
 
         const data = await response.json();
-        
-        // FIXED: Using checkoutUrl to match your Backend OrderService
         if (data.checkoutUrl) {
             window.location.href = data.checkoutUrl;
-        } else if (data.paymentUrl) {
-            window.location.href = data.paymentUrl;
         } else {
-            throw new Error(data.error || "Checkout failed to initialize");
+            alert("Checkout Error: " + (data.message || "Could not init payment"));
         }
     } catch (err) {
         console.error("Checkout Failed:", err);
-        alert("Checkout error: " + err.message);
     }
 }

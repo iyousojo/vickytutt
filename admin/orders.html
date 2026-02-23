@@ -60,49 +60,52 @@
   <script src="fetch.js"></script>
  
 <script>
-    async function loadOrdersTable() {
-        const tableBody = document.getElementById('orderList');
-        // Show loading state
-        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Fetching orders...</td></tr>';
+  async function loadOrdersTable() {
+    const tableBody = document.getElementById('orderList');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Fetching orders...</td></tr>';
+    
+    try {
+        const result = await fetchAllOrders();
         
-        try {
-            const result = await fetchAllOrders();
-            
-            if (result.success && result.data.length > 0) {
-                tableBody.innerHTML = result.data.map(order => `
+        if (result.success && result.data.length > 0) {
+            tableBody.innerHTML = result.data.map(order => {
+                // Generate HTML for items inside this order
+                const itemsHtml = order.items.map(item => `
+                    <div style="margin-bottom: 8px; border-left: 2px solid #eee; padding-left: 8px;">
+                        <span style="display:block; font-weight: 600;">${item.name}</span>
+                        <span style="font-size: 0.75rem; color: #666;">
+                            Size: <strong>${item.size || 'N/A'}</strong> | Qty: ${item.qty}
+                        </span>
+                    </div>
+                `).join('');
+
+                return `
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding: 15px;">#${order._id.slice(-5).toUpperCase()}</td>
                         <td>
                             <strong>${order.userId?.firstName || 'Guest'}</strong><br>
-                            <small style="color:gray;">${order.userId?.email || 'N/A'}</small>
+                            <small style="color:gray;">${order.userId?.email || ''}</small>
                         </td>
+                        <td style="padding: 10px 0;">${itemsHtml}</td>
                         <td>₦${Number(order.totalAmount || 0).toLocaleString()}</td>
                         <td>
-                            <span class="status-pill ${order.status}">
+                            <span class="status ${order.status}">
                                 ${order.status}
                             </span>
                         </td>
+                        <td style="text-align: center;">
+                            <button class="view-btn" onclick="updateStatus('${order._id}')">Update</button>
+                        </td>
                     </tr>
-                `).join('');
-            } else {
-                const message = result.message || "No orders found in the database.";
-                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">${message}</td></tr>`;
-            }
-        } catch (error) {
-            console.error("Table Load Error:", error);
-            tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:red;">Failed to connect to server.</td></tr>';
-        }
-    }
-
-    // Run when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-        const token = localStorage.getItem('vicky_admin_token');
-        if (!token) {
-            window.location.replace('adminlogin.html');
+                `;
+            }).join('');
         } else {
-            loadOrdersTable();
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No orders found.</td></tr>`;
         }
-    });
+    } catch (error) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Server Error.</td></tr>';
+    }
+}
 </script>
 </body>
 </html>

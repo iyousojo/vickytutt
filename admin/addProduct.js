@@ -17,6 +17,8 @@ document.getElementById('addProductForm').onsubmit = async (e) => {
     fd.append('price', document.getElementById('pPrice').value);
     fd.append('category', document.getElementById('pCategory').value);
     fd.append('isNewArrival', document.getElementById('pNewArrival').checked);
+    fd.append('size', document.getElementById('pSize').value);
+    fd.append('stock', document.getElementById('pStock').value);
     
     const imageFile = document.getElementById('imageInput').files[0];
     if (imageFile) {
