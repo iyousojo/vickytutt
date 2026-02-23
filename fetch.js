@@ -1,4 +1,4 @@
-const IMG_PREFIX = "https://ecommerceapi-f6ep.onrender.com";
+const IMG_PREFIX = "https://ecommerceapi-f6ep.onrender.com/";
 
 async function fetchAllProducts() {
     try {

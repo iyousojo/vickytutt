@@ -132,7 +132,8 @@
         renderCart();
     });
 
-    function renderCart() {
+    // 1. Render Cart with Stock Awareness
+    async function renderCart() {
         const cartList = document.getElementById('cartItemsList');
         const countHeader = document.getElementById('cartCountHeader');
         const subtotalEl = document.getElementById('cartSubtotal');
@@ -152,22 +153,40 @@
             return;
         }
 
+        // Fetch fresh product data to get current stock levels
+        let allProducts = [];
+        try {
+            const response = await fetchAllProducts();
+            allProducts = response?.data?.data || response?.data || [];
+        } catch (e) { console.error("Could not refresh stock info", e); }
+
         cartList.innerHTML = '';
         let total = 0;
 
         cart.forEach((item, index) => {
+            // Find stock for this specific item and size
+            const productInfo = allProducts.find(p => p._id === item.id);
+            const variant = productInfo?.variants?.find(v => v.size === item.size) || productInfo?.variants?.[0];
+            const stockAvailable = variant ? variant.stock : 0;
+            
+            const isAtMax = item.quantity >= stockAvailable;
             total += (item.price * item.quantity);
+
             cartList.innerHTML += `
                 <div class="cart-item">
                     <img src="${item.image}" alt="${item.name}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/100'">
                     <div class="item-details">
                         <span class="item-name">${item.name}</span>
+                        <small style="color: #666; display: block; margin-bottom: 4px;">Size: ${item.size || 'N/A'}</small>
                         <span class="item-price">₦${Number(item.price).toLocaleString()}</span>
+                        
                         <div class="quantity-control">
                             <button onclick="updateQty(${index}, -1)">-</button>
                             <span>${item.quantity}</span>
-                            <button onclick="updateQty(${index}, 1)">+</button>
+                            <button onclick="updateQty(${index}, 1)" 
+                                ${isAtMax ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>+</button>
                         </div>
+                        ${isAtMax ? `<small style="color:red; font-size:10px;">Max stock reached</small>` : ''}
                     </div>
                     <i class="fa-regular fa-trash-can delete-item" onclick="removeItem(${index})"></i>
                 </div>`;
@@ -177,10 +196,30 @@
         document.getElementById('checkoutBtn').disabled = false;
     }
 
-    function updateQty(index, change) {
+    // 2. Async Update Quantity with Stock Validation
+    async function updateQty(index, change) {
         let cart = JSON.parse(localStorage.getItem('vicky_cart'));
-        cart[index].quantity += change;
-        if (cart[index].quantity < 1) cart[index].quantity = 1;
+        const item = cart[index];
+
+        if (change > 0) {
+            try {
+                const response = await fetchAllProducts();
+                const products = response?.data?.data || response?.data || [];
+                const productInfo = products.find(p => p._id === item.id);
+                const variant = productInfo?.variants?.find(v => v.size === item.size) || productInfo?.variants?.[0];
+                
+                if (variant && item.quantity >= variant.stock) {
+                    alert(`Only ${variant.stock} available for this item.`);
+                    return;
+                }
+            } catch (err) {
+                console.error("Stock check failed:", err);
+            }
+        }
+
+        item.quantity += change;
+        if (item.quantity < 1) item.quantity = 1;
+        
         localStorage.setItem('vicky_cart', JSON.stringify(cart));
         renderCart();
     }
@@ -192,13 +231,14 @@
         renderCart();
     }
 
+    // 3. Checkout Logic
     async function goToCheckout() {
         const token = localStorage.getItem('vicky_token');
         const cart = JSON.parse(localStorage.getItem('vicky_cart')) || [];
 
         if (!token) {
             alert("Please login to proceed.");
-            window.location.href = 'signuoform.html';
+            window.location.href = 'signupform.html';
             return;
         }
 
@@ -206,13 +246,15 @@
         checkoutBtn.innerText = "Securing Transaction...";
         checkoutBtn.disabled = true;
 
+        // Map items to include size for backend validation
         const items = cart.map(item => ({
             productId: item.id,
+            name: item.name,
+            size: item.size,
             qty: item.quantity
         }));
 
         try {
-            // IMG_PREFIX is defined in fetch.js
             const response = await fetch(`${IMG_PREFIX}/api/orders/checkout`, {
                 method: 'POST',
                 headers: {
@@ -227,22 +269,17 @@
             if (response.ok && data.paymentUrl) {
                 window.location.href = data.paymentUrl;
             } else {
-                // HANDLE TOKEN FAILURE SPECIFICALLY
-                if (data.message === "Token failed" || response.status === 401) {
-                    alert("Your session has expired. Please login again.");
-                    localStorage.removeItem('vicky_token');
-                    localStorage.removeItem('vicky_user');
+                if (response.status === 401) {
+                    alert("Session expired. Please login again.");
                     window.location.href = 'signuoform.html';
                 } else {
-                    alert("Checkout Error: " + (data.error || data.message));
+                    alert(data.message || "Checkout failed. Check stock levels.");
                 }
                 checkoutBtn.innerText = "Proceed to Checkout";
                 checkoutBtn.disabled = false;
             }
         } catch (err) {
-            console.error("Network Error:", err);
-            alert("Server connection failed. Try again in a moment.");
-            checkoutBtn.innerText = "Proceed to Checkout";
+            alert("Network error. Please try again.");
             checkoutBtn.disabled = false;
         }
     }

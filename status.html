@@ -45,37 +45,53 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
+        
+        // If there are no parameters at all, just go home
+        if (!params.has('success') && !params.has('msg')) {
+            window.location.href = 'index.html';
+            return;
+        }
+
         const isSuccess = params.get('success') === 'true';
-        const orderId = params.get('ord') || ""; // Fallback to empty string
+        const orderId = params.get('ord') || ""; 
         const errorMsg = params.get('msg');
 
         const content = document.getElementById('statusContent');
         const loader = document.getElementById('loader');
 
-        // Hide loader and show content
+        // Transition UI
         loader.classList.add('hidden');
         content.classList.remove('hidden');
 
         if (isSuccess) {
-            // 1. Clear the cart
+            // Clear cart so they don't buy the same thing twice accidentally
             localStorage.removeItem('vicky_cart');
             
-            // 2. Format order ID (Safely handle if ID is too short)
-            const displayId = orderId.length > 6 ? orderId.slice(-6).toUpperCase() : "SUCCESS";
+            // Format 24-char MongoID to a readable 6-char code
+            const displayId = orderId.length >= 6 ? orderId.slice(-6).toUpperCase() : "SUCCESS";
 
             content.innerHTML = `
                 <i class="fa-solid fa-circle-check status-icon success-icon"></i>
                 <h2 style="margin-bottom:10px;">Payment Successful!</h2>
-                <p>Thank you for shopping with Vicky's Thrift. Your order <strong>#${displayId}</strong> is being processed.</p>
+                <p>Thank you for shopping with Vicky's Thrift.</p>
+                <p style="background: #f0f0f0; padding: 10px; border-radius: 8px; margin: 15px 0;">
+                    Order Reference: <strong>#${displayId}</strong>
+                </p>
+                <p style="font-size: 0.9rem; color: #666;">A confirmation email has been sent to your inbox.</p>
                 <a href="index.html" class="btn-home">Continue Shopping</a>
             `;
         } else {
+            // Map common error codes to friendly messages
+            let friendlyError = errorMsg || "Please try again.";
+            if (errorMsg === 'no_reference') friendlyError = "Transaction reference missing.";
+            if (errorMsg === 'payment_incomplete') friendlyError = "The bank did not authorize the funds.";
+
             content.innerHTML = `
                 <i class="fa-solid fa-circle-xmark status-icon error-icon"></i>
                 <h2 style="margin-bottom:10px;">Payment Failed</h2>
-                <p>We couldn't process your payment. ${errorMsg || "Please try again."}</p>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <a href="addtocart.html" class="btn-home">Go Back to Bag</a>
+                <p>${friendlyError}</p>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top: 20px;">
+                    <a href="addtocart.html" class="btn-home">Try Again</a>
                     <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">Return to Home</a>
                 </div>
             `;

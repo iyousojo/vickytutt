@@ -1028,7 +1028,28 @@ nav {
     }
     
 }
+.shop-card.sold-out {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+}
 
+.out-of-stock-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4d4d;
+    color: white;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 5;
+}
+
+.add-btn.disabled {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+}
 
 /* MOBILE RESPONSIVENESS */
 @media (max-width: 992px) {

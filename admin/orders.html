@@ -67,11 +67,13 @@
     try {
         const result = await fetchAllOrders();
         
+        // We look for result.success because your controller sends { success: true, data: orders }
         if (result.success && result.data.length > 0) {
             tableBody.innerHTML = result.data.map(order => {
-                // Generate HTML for items inside this order
+                
+                // 1. Handle Order Items from the Array
                 const itemsHtml = order.items.map(item => `
-                    <div style="margin-bottom: 8px; border-left: 2px solid #eee; padding-left: 8px;">
+                    <div style="margin-bottom: 8px; border-left: 2px solid #ddd; padding-left: 8px;">
                         <span style="display:block; font-weight: 600;">${item.name}</span>
                         <span style="font-size: 0.75rem; color: #666;">
                             Size: <strong>${item.size || 'N/A'}</strong> | Qty: ${item.qty}
@@ -79,12 +81,18 @@
                     </div>
                 `).join('');
 
+                // 2. Format the Date (using createdAt from your schema)
+                const orderDate = new Date(order.createdAt).toLocaleDateString();
+
                 return `
                     <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 15px;">#${order._id.slice(-5).toUpperCase()}</td>
+                        <td style="padding: 15px;">
+                            <strong>#${order._id.slice(-5).toUpperCase()}</strong><br>
+                            <small style="color:gray;">${orderDate}</small>
+                        </td>
                         <td>
                             <strong>${order.userId?.firstName || 'Guest'}</strong><br>
-                            <small style="color:gray;">${order.userId?.email || ''}</small>
+                            <small style="color:gray;">${order.userId?.email || 'No email'}</small>
                         </td>
                         <td style="padding: 10px 0;">${itemsHtml}</td>
                         <td>₦${Number(order.totalAmount || 0).toLocaleString()}</td>
@@ -103,9 +111,13 @@
             tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No orders found.</td></tr>`;
         }
     } catch (error) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Server Error.</td></tr>';
+        console.error("Table Load Error:", error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:red;">Connection Error.</td></tr>';
     }
 }
+
+// Initial load
+document.addEventListener('DOMContentLoaded', loadOrdersTable);
 </script>
 </body>
 </html>
