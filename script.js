@@ -19,11 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 function handleUserAuth() {
     const token = localStorage.getItem('vicky_token');
-    const userName = localStorage.getItem('vicky_user_name');
+    // You named it userName here...
+    const userName = localStorage.getItem('vicky_user_name'); 
     const userNameDisplay = document.getElementById('userNameDisplay');
 
     if (token && userNameDisplay) {
-        userNameDisplay.innerText = savedName || "Welcome Back!";
+        // ...so you must use userName here (not savedName)
+        userNameDisplay.innerText = userName || "Welcome Back!";
     } else {
         if(userNameDisplay) userNameDisplay.innerText = "Guest User";
     }
@@ -158,4 +160,8 @@ async function initiateCheckout() {
     } catch (err) {
         console.error("Checkout Failed:", err);
     }
+}function fixImg(url) {
+    if (!url) return 'https://via.placeholder.com/300'; // Fallback image
+    if (url.startsWith('http')) return url;
+    return `https://ecommerceapi-f6ep.onrender.com/${url}`;
 }
