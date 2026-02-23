@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     handleUserAuth();
     loadPageData();
     
-    // Mobile Menu & Click-outside logic remains unchanged...
     const menuBtn = document.getElementById('menuBtn');
     const navLinks = document.querySelector('.nav-links');
     if (menuBtn && navLinks) {
@@ -17,24 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 function handleUserAuth() {
     const token = localStorage.getItem('vicky_token');
-    // You named it userName here...
     const userName = localStorage.getItem('vicky_user_name'); 
     const userNameDisplay = document.getElementById('userNameDisplay');
 
     if (token && userNameDisplay) {
-        // ...so you must use userName here (not savedName)
         userNameDisplay.innerText = userName || "Welcome Back!";
     } else {
         if(userNameDisplay) userNameDisplay.innerText = "Guest User";
     }
 }
+
 async function loadPageData() {
     const shopGrid = document.getElementById('product-grid');
-    const arrivalsGrid = document.getElementById('new-arrivals-grid');
-    const categoryMenu = document.getElementById('category-dropdown');
-
     try {
         const response = await fetchAllProducts();
         let products = response?.data?.data || response?.data || response;
@@ -47,10 +43,8 @@ async function loadPageData() {
 
         allProducts = products;
 
-        // Render Shop Grid with Stock Check
         if (shopGrid) {
             shopGrid.innerHTML = allProducts.slice(0, 8).map(item => {
-                // Check if any variant has stock
                 const totalStock = item.variants?.reduce((sum, v) => sum + v.stock, 0) || 0;
                 const isSoldOut = totalStock <= 0;
 
@@ -90,23 +84,19 @@ function addToBag(productId) {
     const product = allProducts.find(p => p._id === productId);
     if (!product) return;
 
-    // 1. Get variant and stock
     const variant = product.variants?.[0] || null;
     const defaultSize = variant ? variant.size : "N/A";
     const availableStock = variant ? variant.stock : 0;
 
-    // 2. Check local cart
     let cart = JSON.parse(localStorage.getItem('vicky_cart') || '[]');
     const existing = cart.find(item => item.id === productId && item.size === defaultSize);
     const currentQtyInCart = existing ? existing.quantity : 0;
 
-    // 3. Validation
     if (currentQtyInCart >= availableStock) {
         alert(`Limit Reached: Only ${availableStock} items available in size ${defaultSize}.`);
         return;
     }
 
-    // 4. Update Cart
     if (existing) {
         existing.quantity += 1;
     } else {
@@ -130,7 +120,6 @@ async function initiateCheckout() {
     
     if (cart.length === 0) return alert("Your bag is empty!");
 
-    // Map items for backend
     const items = cart.map(item => ({
         productId: item.id,
         name: item.name,
@@ -154,14 +143,9 @@ async function initiateCheckout() {
         if (response.ok && data.paymentUrl) {
             window.location.href = data.paymentUrl;
         } else {
-            // This captures backend stock validation errors
-            alert(data.message || "Checkout failed. Some items may have gone out of stock.");
+            alert(data.message || "Checkout failed.");
         }
     } catch (err) {
         console.error("Checkout Failed:", err);
     }
-}function fixImg(url) {
-    if (!url) return 'https://via.placeholder.com/300'; // Fallback image
-    if (url.startsWith('http')) return url;
-    return `https://ecommerceapi-f6ep.onrender.com/${url}`;
 }
