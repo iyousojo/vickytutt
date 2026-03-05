@@ -297,7 +297,16 @@
             font-size: 4rem;
             color: var(--gold);
             margin-bottom: 20px;
-        }
+        }/* Pulse animation for the loading button */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.brand-btn-pill:disabled {
+    animation: pulse 1.5s infinite ease-in-out;
+}
     </style>
 </head>
 <body class="auth-body">
