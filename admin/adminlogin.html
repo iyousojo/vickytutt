@@ -3,30 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login | Vicky's Collection</title>
+  <title>Admin Portal | Vicky's Collection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css" />
 </head>
-<body>
+<body class="login-page">
+  <div class="login-overlay"></div>
+  
   <div class="login-container">
     <div class="login-card">
-      <h1 class="brand">Vicky's Collection</h1>
-      <p class="subtitle">Admin Access</p>
-      <form id="adminLoginForm">
+      <div class="login-header">
+        <h1 class="brand">VICKY'S</h1>
+        <div class="separator"></div>
+        <p class="subtitle">ADMINISTRATOR PORTAL</p>
+      </div>
+
+      <form id="adminLoginForm" class="login-form">
         <div class="input-group">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="admin@email.com" required />
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="name@vickys.com" required autocomplete="email" />
         </div>
-        <div class="input-group password-group" style="position: relative;">
-          <label>Password</label>
-          <input type="password" id="password" placeholder="••••••••" required style="width: 100%;" />
-          <span class="toggle" id="togglePassword" style="position: absolute; right: 10px; top: 35px; cursor: pointer;">👁</span>
+
+        <div class="input-group">
+          <label for="password">Security Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+            <button type="button" id="togglePassword" class="visibility-toggle" aria-label="Toggle Password">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
-        <button type="submit" class="btn" id="loginBtn">Login</button>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Secure Sign In</span>
+          <div class="loader" id="loginLoader"></div>
+        </button>
       </form>
-      <p id="errorMsg" style="color: #c0392b; text-align: center; display: none; margin-top: 10px;"></p>
+
+      <p id="errorMsg" class="error-banner"></p>
+      
+      <footer class="login-footer">
+        &copy; 2026 Vicky's Collection. Systems Protected.
+      </footer>
     </div>
   </div>
+
   <script src="fetch.js"></script>
   <script src="auth.js"></script>
+  <script>
+  const toggleBtn = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+
+toggleBtn.addEventListener('click', () => {
+    // Toggle the input type
+    const isPassword = passwordInput.getAttribute('type') === 'password';
+    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+    
+    // Toggle the 'visible' class for the CSS animation
+    toggleBtn.classList.toggle('visible');
+    
+    // Optional: Update the icon itself if you want to switch between Eye and Eye-Off
+    if (isPassword) {
+        // Change to "Eye-Off" icon or add a slash
+        toggleBtn.style.opacity = "1";
+    } else {
+        toggleBtn.style.opacity = "0.6";
+    }
+});
+  </script>
 </body>
 </html>

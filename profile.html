@@ -3,71 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vicky's Collection | Luxury Thriftwears</title>
+    <title>Account Details | Vicky's Collection</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #d4af37;
+            --bg: #f8f9fa;
+            --border: #eeeeee;
+        }
+
+        body { 
+            background-color: var(--bg); 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .profile-container { 
+            max-width: 440px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            background: #ffffff; 
+            min-height: 100vh;
+        }
+
+        /* Back Button */
+        .nav-header { margin-bottom: 30px; }
+        .nav-header a { color: var(--primary); text-decoration: none; font-size: 1.2rem; }
+
+        /* Data Fields Styling */
+        .db-field {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .field-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #888;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .field-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Size Selector - Matches 'default_size' in Schema */
+        .size-selector {
+            margin-top: 35px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 12px;
+        }
+
+        .size-grid {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .size-btn { 
+            flex: 1; 
+            padding: 12px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .size-btn.active { 
+            background: var(--primary); 
+            color: white; 
+            border-color: var(--primary);
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            background: #eee;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .role-admin { background: #fff4cc; color: #996515; }
+
+        .logout-link {
+            display: block;
+            margin-top: 50px;
+            text-align: center;
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="profile-container">
-    <div class="back-nav">
+
+<div class="profile-container">
+    <div class="nav-header">
         <a href="index.html"><i class="fa-solid fa-arrow-left"></i></a>
     </div>
 
-    <div class="profile-header">
-        <div class="avatar-wrapper">
-            <img src="image/landingpage.png.JPG" alt="Profile Picture" class="profile-img">
-            <div class="edit-badge"><i class="fa-solid fa-camera"></i></div>
-        </div>
-        <h2 class="user-name">John Doe</h2>
-        <p class="user-email">johndoe@example.com</p>
+    <!-- DB Field: firstName -->
+    <div class="db-field">
+        <span class="field-label">First Name</span>
+        <h2 class="field-value" id="firstName">—</h2>
     </div>
 
-    <div class="profile-section">
-        <div class="section-header">
-            <h3>Recent Orders</h3>
-            <a href="#" class="view-all">View All</a>
-        </div>
-        <div class="order-card">
-            <div class="order-info">
-                <span class="order-id">#VC-8829</span>
-                <span class="order-date">Jan 15, 2026</span>
-            </div>
-            <div class="order-status processing">Processing</div>
+    <!-- DB Field: email -->
+    <div class="db-field">
+        <span class="field-label">Email Address</span>
+        <p class="field-value" id="email">—</p>
+    </div>
+
+    <!-- DB Field: role -->
+    <div class="db-field">
+        <span class="field-label">Account Status</span>
+        <div id="roleBadge" class="role-badge">Customer</div>
+    </div>
+
+    <!-- DB Field: default_size -->
+    <div class="size-selector">
+        <span class="field-label">Default Size Preference</span>
+        <div class="size-grid">
+            <button class="size-btn" onclick="updateSize('S')">S</button>
+            <button class="size-btn" onclick="updateSize('M')">M</button>
+            <button class="size-btn" onclick="updateSize('L')">L</button>
+            <button class="size-btn" onclick="updateSize('XL')">XL</button>
         </div>
     </div>
 
-    <div class="settings-list">
-        <div class="settings-item">
-            <div class="item-left">
-                <i class="fa-solid fa-user-gear"></i>
-                <span>Edit Profile</span>
-            </div>
-            <i class="fa-solid fa-chevron-right"></i>
-        </div>
-
-        <div class="settings-item">
-            <div class="item-left">
-                <i class="fa-solid fa-location-dot"></i>
-                <span>Shipping Address</span>
-            </div>
-            <i class="fa-solid fa-chevron-right"></i>
-        </div>
-
-        <div class="settings-item">
-            <div class="item-left">
-                <i class="fa-solid fa-credit-card"></i>
-                <span>Payment Methods</span>
-            </div>
-            <i class="fa-solid fa-chevron-right"></i>
-        </div>
-
-        <div class="settings-item logout">
-            <div class="item-left">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Logout</span>
-            </div>
-        </div>
-    </div>
+    <a class="logout-link" id="logoutBtn">Sign Out of Account</a>
 </div>
+
+<script>
+
+
+const API_BASE = 'https://ecommerceapi-f6ep.onrender.com/api/auth';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const rawUser = localStorage.getItem('vicky_user');
+    const token = localStorage.getItem('vicky_token');
+    
+    if (!rawUser || rawUser === "undefined" || !token) {
+        window.location.href = 'signupform.html';
+        return;
+    }
+
+    let user = JSON.parse(rawUser);
+    updateUI(user);
+
+    // Live Sync from Database
+    try {
+        const response = await fetch(`${API_BASE}/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('vicky_user', JSON.stringify(data.user));
+            updateUI(data.user);
+        }
+    } catch (err) {
+        console.warn("Offline mode: using cached data.");
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    });
+});
+
+function updateUI(user) {
+    document.getElementById('firstName').innerText = user.firstName || "User";
+    document.getElementById('email').innerText = user.email || "—";
+    const roleBadge = document.getElementById('roleBadge');
+    roleBadge.innerText = user.role || 'customer';
+    if (user.role === 'admin') roleBadge.classList.add('role-admin');
+    highlightSize(user.default_size || 'M');
+}
+
+function highlightSize(size) {
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText === size);
+    });
+}
+
+async function updateSize(newSize) {
+    const token = localStorage.getItem('vicky_token');
+    const oldSize = document.querySelector('.size-btn.active')?.innerText;
+    
+    highlightSize(newSize); // Optimistic UI update
+
+    try {
+        const response = await fetch(`${API_BASE}/update-size`, {
+            method: 'PATCH',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ default_size: newSize })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('vicky_user', JSON.stringify(data.user));
+            console.log("Preference synced.");
+        } else {
+            throw new Error(data.error || "Server rejected update");
+        }
+    } catch (err) {
+        highlightSize(oldSize); // Rollback UI
+        alert("Update Failed: " + err.message);
+    }
+}
+</script>
 </body>
 </html>

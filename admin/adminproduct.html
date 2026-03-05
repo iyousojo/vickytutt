@@ -2,16 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Products List</title>
+  <title>Inventory | Vicky's</title>
   <link rel="stylesheet" href="admin.css"/>
 </head>
 <body>
-  <header class="topbar">
-    <h2>Inventory</h2>
-    <button class="menu-btn" id="menuBtn">☰</button>
-  </header>
-
-  <nav class="sidebar" id="sidebar">
+  <nav class="sidebar">
+    <div class="sidebar-brand">VICKY ADMIN</div>
     <a href="admin.html">Dashboard</a>
     <a href="adminorder.html">Add Product</a>
     <a href="adminproduct.html" class="active">Product List</a>
@@ -20,10 +16,48 @@
   </nav>
 
   <main class="content">
-    <div class="compact-list" id="productListContainer">
-      </div>
-  </main>
+    <header class="topbar">
 
+        <h2>Active Inventory</h2>
+        <input type="text" id="adminSearch" onkeyup="filterProducts()" placeholder="Search products..." style="padding:8px; border-radius:4px; border:1px solid #ddd; width:250px;">
+
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        
+    </header>
+    <div class="container-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Size</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="productListContainer">
+                </tbody>
+        </table>
+    </div>
+  </main>
+  <script>
+    function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('active');
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.querySelector('.sidebar');
+    const menuBtn = document.querySelector('.menu-btn');
+    
+    if (window.innerWidth < 768) {
+        if (!sidebar.contains(event.target) && !menuBtn.contains(event.target)) {
+            sidebar.classList.remove('active');
+        }
+    }
+});
+  </script>
   <script src="fetch.js"></script>
   <script src="productList.js"></script>
 </body>

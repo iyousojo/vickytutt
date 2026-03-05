@@ -13,6 +13,8 @@
             --gold: #d4af37;
             --dark: #121212;
             --soft-gray: #f8f9fa;
+            --danger: #e74c3c;
+            --success: #27ae60;
         }
 
         body.auth-body {
@@ -22,6 +24,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            font-family: 'Inter', sans-serif;
         }
 
         .back-nav {
@@ -58,7 +61,7 @@
             width: 100%;
             max-width: 450px;
             padding: 50px 40px;
-            border-radius: 4px; /* Shorter radius for a high-fashion look */
+            border-radius: 4px; 
             box-shadow: 0 20px 60px rgba(0,0,0,0.08);
             position: relative;
         }
@@ -113,8 +116,7 @@
             line-height: 1.5;
         }
 
-        /* Form Improvements */
-        .form-group { margin-bottom: 22px; }
+        .form-group { margin-bottom: 22px; position: relative; }
 
         .form-group label {
             display: block;
@@ -143,6 +145,7 @@
         }
 
         .password-wrapper { position: relative; }
+        
         .toggle-pass {
             position: absolute;
             right: 15px;
@@ -150,6 +153,25 @@
             transform: translateY(-50%);
             cursor: pointer;
             color: #999;
+            z-index: 5;
+            padding: 5px;
+        }
+
+        /* Password Strength Meter */
+        .strength-meter {
+            height: 4px;
+            width: 100%;
+            background: #eee;
+            margin-top: 8px;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: 0.4s;
         }
 
         .forgot-link {
@@ -242,17 +264,18 @@
             color: #666;
         }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 2000;
+            backdrop-filter: blur(5px);
         }
         
         .success-box {
@@ -260,7 +283,14 @@
             padding: 40px;
             text-align: center;
             max-width: 400px;
+            width: 90%;
             border-radius: 4px;
+            animation: modalSlide 0.4s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         .success-icon {
@@ -283,6 +313,7 @@
                 <button id="signupTab" class="tab-link" onclick="switchAuth('signup')">Sign Up</button>
             </div>
 
+            <!-- Login Form -->
             <form id="signInForm" class="auth-content">
                 <h1 class="auth-title">Welcome Back</h1>
                 <p class="auth-subtitle">Elevate your style. Log in to your account.</p>
@@ -295,15 +326,16 @@
                 <div class="form-group">
                     <label>Password</label>
                     <div class="password-wrapper">
-                        <input type="password" name="password" placeholder="Min. 8 characters" required>
-                        <i class="fa-regular fa-eye-slash toggle-pass"></i>
+                        <input type="password" name="password" class="pass-input" placeholder="Enter password" required>
+                        <i class="fa-regular fa-eye-slash toggle-pass" onclick="togglePassword(this)"></i>
                     </div>
-                    <a href="javascript:void(0)" onclick="openComingSoon()" class="forgot-link">Forgot Password?</a>
+                    <a href="javascript:void(0)" onclick="alert('Password reset system coming soon!')" class="forgot-link">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="brand-btn-pill">Enter Collection</button>
             </form>
 
+            <!-- Sign Up Form -->
             <form id="signUpForm" class="auth-content hidden">
                 <h1 class="auth-title">Join the Elite</h1>
                 <p class="auth-subtitle">Create an account for a curated experience.</p>
@@ -333,8 +365,11 @@
                 <div class="form-group">
                     <label>Password</label>
                     <div class="password-wrapper">
-                        <input type="password" name="password" placeholder="Create a secure password" required>
-                        <i class="fa-regular fa-eye-slash toggle-pass"></i>
+                        <input type="password" name="password" id="regPassword" class="pass-input" placeholder="Min. 8 characters" required>
+                        <i class="fa-regular fa-eye-slash toggle-pass" onclick="togglePassword(this)"></i>
+                    </div>
+                    <div class="strength-meter" id="strengthMeter">
+                        <div class="strength-bar" id="strengthBar"></div>
                     </div>
                 </div>
 
@@ -357,6 +392,7 @@
         </div>
     </div>
 
+    <!-- Success Modal -->
     <div id="successModal" class="modal-overlay hidden">
         <div class="modal-content success-box">
             <i class="fa-solid fa-circle-check success-icon"></i>
@@ -368,7 +404,7 @@
 
     <script src="auth.js"></script>
     <script>
-        // Toggles forms
+        // Form Toggle Logic
         function switchAuth(type) {
             const loginForm = document.getElementById('signInForm');
             const signupForm = document.getElementById('signUpForm');
@@ -388,10 +424,46 @@
             }
         }
 
+        // Close Modal and Switch to Login
         function closeSuccess() {
             document.getElementById('successModal').classList.add('hidden');
             switchAuth('login');
         }
+
+        // Password Visibility Toggle
+        function togglePassword(icon) {
+            const input = icon.parentElement.querySelector('input');
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            } else {
+                input.type = "password";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            }
+        }
+
+        // Password Strength Meter Logic
+        const regPass = document.getElementById('regPassword');
+        const meter = document.getElementById('strengthMeter');
+        const bar = document.getElementById('strengthBar');
+
+        regPass.addEventListener('input', () => {
+            const val = regPass.value;
+            meter.style.display = val.length > 0 ? 'block' : 'none';
+            
+            let strength = 0;
+            if (val.length >= 8) strength += 25;
+            if (val.match(/[A-Z]/)) strength += 25;
+            if (val.match(/[0-9]/)) strength += 25;
+            if (val.match(/[^A-Za-z0-9]/)) strength += 25;
+
+            bar.style.width = strength + '%';
+            
+            if (strength <= 25) bar.style.backgroundColor = '#e74c3c';
+            else if (strength <= 50) bar.style.backgroundColor = '#f39c12';
+            else if (strength <= 75) bar.style.backgroundColor = '#3498db';
+            else bar.style.backgroundColor = '#27ae60';
+        });
     </script>
 </body>
 </html>

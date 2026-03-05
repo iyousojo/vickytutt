@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><title>Add Product</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Product | Vicky's Admin</title>
   <link rel="stylesheet" href="admin.css"/>
 </head>
 <body>
-  <header class="topbar">
-    <h2>Add New Product</h2>
-    <button class="menu-btn" id="menuBtn">☰</button>
-  </header>
-
   <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">VICKY ADMIN</div>
     <a href="admin.html">Dashboard</a>
     <a href="adminorder.html" class="active">Add Product</a>
     <a href="adminproduct.html">Product List</a>
@@ -19,54 +17,97 @@
   </nav>
 
   <main class="content">
-    <form class="product-form" id="addProductForm">
-      <div class="input-group">
-        <label>Product Name</label>
-        <input type="text" id="pName" placeholder="e.g. Silk Summer Dress" required />
-      </div>
-      
-      <div class="input-group">
-        <label>Price (₦)</label>
-        <input type="number" id="pPrice" placeholder="5000" required />
-      </div>
+    <header class="topbar">
+      <h2>Create New Listing</h2>
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    </header>
 
-      <div class="input-group">
-        <label>Category</label>
-        <input type="text" id="pCategory" placeholder="e.g. Vintage, Luxury" required />
-      </div>
+    <div class="container-box" style="max-width: 700px; margin: 0 auto;">
+      <form id="addProductForm">
+        <div class="input-group">
+          <label>Product Name</label>
+          <input type="text" id="pName" placeholder="e.g. Vintage Silk Gown" required />
+        </div>
 
-      <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px;">
-        <input type="checkbox" id="pNewArrival" style="width: auto;" />
-        <label for="pNewArrival" style="margin: 0;">Mark as New Arrival</label>
-      </div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 5px;">
+          <div class="input-group" style="flex: 1; min-width: 250px;">
+            <label>Price (₦)</label>
+            <input type="number" id="pPrice" placeholder="15000" required />
+          </div>
+          <div class="input-group" style="flex: 1; min-width: 250px;">
+            <label>Stock Quantity</label>
+            <input type="number" id="pStock" value="1" required />
+          </div>
+        </div>
 
-      <div class="input-group">
-        <label>Product Image</label>
-        <input type="file" id="imageInput" accept="image/*" required />
-        <img id="imagePreview" style="width: 120px; margin-top: 10px; display: none; border-radius: 8px;" />
-      </div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 5px;">
+          <div class="input-group" style="flex: 1; min-width: 250px;">
+            <label>Category (Manual)</label>
+            <input type="text" id="pCategory" placeholder="e.g. Luxury, Vintage, Summer" required />
+          </div>
+          <div class="input-group" style="flex: 1; min-width: 250px;">
+            <label>Product Size</label>
+            <select id="pSize" required>
+              <option value="" disabled selected>Choose size</option>
+              <option value="XS">Extra Small</option>
+              <option value="S">Small</option>
+              <option value="M">Medium</option>
+              <option value="L">Large</option>
+              <option value="XL">Extra Large</option>
+            </select>
+          </div>
+        </div>
 
-      <div class="input-group">
-  <label>Size</label>
-  <input type="text" id="pSize" placeholder="e.g. M, L, or 42" required />
-</div>
+        <div class="input-group">
+          <label>Product Image</label>
+          <input type="file" id="imageInput" accept="image/*" required />
+          <div id="preview-container" style="text-align: center; margin-top: 15px; display: none;">
+            <img id="imagePreview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;" />
+          </div>
+        </div>
 
-<div class="input-group">
-  <label>Stock Quantity</label>
-  <input type="number" id="pStock" placeholder="1" min="1" required />
-</div>
+        <label style="display: flex; align-items: center; gap: 10px; margin: 20px 0; cursor: pointer; font-size: 0.9rem;">
+          <input type="checkbox" id="pNewArrival" style="width: auto;"> 
+          <span>Display in <strong>New Arrivals</strong> collection</span>
+        </label>
 
-      <button type="submit" class="btn" id="submitBtn">Add Product</button>
-    </form>
+        <p id="formStatus" style="display:none; margin-bottom:15px; font-size:0.9rem; text-align:center; padding:10px; border-radius:4px;"></p>
+
+        <button type="submit" class="btn" id="submitBtn">Add Product to Store</button>
+      </form>
+    </div>
   </main>
 
   <script src="fetch.js"></script>
   <script src="addProduct.js"></script>
   <script>
-    // Sidebar Toggle Logic
-    document.getElementById('menuBtn').onclick = () => {
-        document.getElementById('sidebar').classList.toggle('active');
+    // Responsive Sidebar Toggle
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.querySelector('.menu-btn');
+      if (window.innerWidth < 768 && !sidebar.contains(event.target) && !menuBtn.contains(event.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Image Preview Logic
+    document.getElementById('imageInput').onchange = function(evt) {
+      const [file] = this.files;
+      if (file) {
+        document.getElementById('preview-container').style.display = 'block';
+        document.getElementById('imagePreview').src = URL.createObjectURL(file);
+      }
     };
+
+    function logoutAdmin() {
+      localStorage.removeItem('vicky_admin_token');
+      window.location.href = 'adminlogin.html';
+    }
   </script>
 </body>
 </html>
